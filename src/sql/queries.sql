@@ -1,10 +1,3 @@
-SELECT * FROM regions;
-SELECT * FROM species;
-SELECT * FROM climate;
-
--- python src/app.py
-;
-
 -- Level 1 – Basic exploration (SELECT, LIMIT, DISTINCT, WHERE);
 -- 1. What are the first 10 recorded observations?;
 SELECT *
@@ -51,17 +44,67 @@ GROUP BY observer
 ORDER BY num_appeareances DESC
 LIMIT 10;
 
--- MISSION 5
--- Your query here;
+-- Level 3 – Relationships between tables (JOIN);
+-- 10. Show the region name (regions.name) for each observation;
+SELECT 
+    obs.id AS obs_id,
+    species_id,
+    region_id,
+    reg.name,
+    observer,
+    observation_date,
+    latitude,
+    longitude,
+    count
+FROM observations AS obs
+INNER JOIN regions AS reg
+    ON obs.region_id = reg.id;
+-- 11. Show the scientific name of each recorded species (species.scientific_name);
+SELECT 
+    obs.id AS obs_id,
+    species_id,
+    scientific_name,
+    region_id,
+    observer,
+    observation_date,
+    latitude,
+    longitude,
+    count
+FROM observations AS obs
+INNER JOIN species AS esp
+    ON obs.species_id = esp.id;
 
+-- 12. Which is the most observed species in each region?;
+SELECT 
+    t1.region_name,
+    t1.species_name,
+    t1.num_observations
+FROM (
+    SELECT 
+        r1.name AS region_name,
+        s1.scientific_name AS species_name,
+        COUNT(*) AS num_observations
+    FROM observations AS o1
+    INNER JOIN regions AS r1
+        ON o1.region_id = r1.id
+    INNER JOIN species AS s1
+        ON o1.species_id = s1.id
+    GROUP BY region_name, species_name
+    ) AS t1
+WHERE t1.num_observations = (
+    SELECT MAX(t2.num_observations)
+    FROM (
+        SELECT 
+            r2.name AS region_name,
+            s2.scientific_name AS species_name,
+            COUNT(*) AS num_observations
+        FROM observations AS o2
+        INNER JOIN regions AS r2
+            ON o2.region_id = r2.id
+        INNER JOIN species AS s2
+            ON o2.species_id = s2.id
+        GROUP BY region_name, species_name
+    ) AS t2
+    WHERE t2.region_name = t1.region_name
+);
 
--- MISSION 6
--- Your query here;
-
-
--- MISSION 7
--- Your query here;
-
-
--- MISSION 8
--- Your query here;
