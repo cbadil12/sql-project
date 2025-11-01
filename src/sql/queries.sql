@@ -76,35 +76,26 @@ INNER JOIN species AS esp
 
 -- 12. Which is the most observed species in each region?;
 SELECT 
-    t1.region_name,
-    t1.species_name,
-    t1.num_observations
-FROM (
-    SELECT 
-        r1.name AS region_name,
-        s1.scientific_name AS species_name,
-        COUNT(*) AS num_observations
-    FROM observations AS o1
-    INNER JOIN regions AS r1
-        ON o1.region_id = r1.id
-    INNER JOIN species AS s1
-        ON o1.species_id = s1.id
-    GROUP BY region_name, species_name
-    ) AS t1
-WHERE t1.num_observations = (
-    SELECT MAX(t2.num_observations)
-    FROM (
-        SELECT 
-            r2.name AS region_name,
-            s2.scientific_name AS species_name,
-            COUNT(*) AS num_observations
-        FROM observations AS o2
-        INNER JOIN regions AS r2
-            ON o2.region_id = r2.id
-        INNER JOIN species AS s2
-            ON o2.species_id = s2.id
-        GROUP BY region_name, species_name
-    ) AS t2
-    WHERE t2.region_name = t1.region_name
-);
+    r.name AS region_name,
+    s.scientific_name AS species_name,
+    COUNT(*) AS total_count
+FROM observations AS o
+INNER JOIN species AS s
+    ON o.species_id = s.id
+INNER JOIN regions As r
+    ON o.region_id = r.id
+GROUP BY region_name, species_name
+ORDER BY region_name, total_count DESC;
 
+-- Level 4 (optional) – Data manipulation;
+-- 13.Insert a new fictitious observation into the `observations` table;
+INSERT INTO observations
+    (species_id, region_id, observer, observation_date, count)
+VALUES (25, 8, 'Carlitos', '2025-11-01', 1);
+-- 14. Correct the scientific name of a species with a typo;
+UPDATE species
+SET species.scientific_name="Carlitos Maximus"
+WHERE species.scienfic_name="Carlitos MinimusSss"
+-- 15. Delete a test observation (use its `id`);
+DELETE FROM observations
+WHERE id = 55;
